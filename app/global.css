@@ -1,0 +1,6 @@
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body { background: #0F0F14; overscroll-behavior: none; }
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+input[type="date"] { appearance: none; -webkit-appearance: none; }
+button:focus, input:focus, select:focus { outline: none; }
