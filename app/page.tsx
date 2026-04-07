@@ -20,13 +20,13 @@ const COLOR_OPTIONS = ["#FF6B6B","#4ECDC4","#45B7D1","#F7DC6F","#F0A500","#FF6B9
 const CURRENCIES = ["MYR","USD","EUR","SGD","GBP","JPY","AUD"];
 const MEMBER_COLORS = ["#6C63FF","#FF6B9D","#4ECDC4","#F0A500","#FF6B6B","#00D2FF","#C44DFF","#06D6A0"];
 
-function today(o=0){ const d=new Date(); d.setDate(d.getDate()+o); return d.toISOString().split("T")[0]; }
-function fmt(n,c="MYR"){ return new Intl.NumberFormat("en-MY",{style:"currency",currency:c,minimumFractionDigits:2}).format(n); }
-function rel(ds){ const d=new Date(ds),now=new Date(),diff=Math.floor((now-d)/86400000); if(diff===0)return"Today"; if(diff===1)return"Yesterday"; return d.toLocaleDateString("en-MY",{day:"numeric",month:"short"}); }
-function weekOf(ds){ const d=new Date(ds); d.setDate(d.getDate()-d.getDay()); return d.toISOString().split("T")[0]; }
+function today(o: number=0){ const d=new Date(); d.setDate(d.getDate()+o); return d.toISOString().split("T")[0]; }
+function fmt(n: number, c: string ="MYR"){ return new Intl.NumberFormat("en-MY",{style:"currency",currency:c,minimumFractionDigits:2}).format(n); }
+function rel(ds: string){ const d=new Date(ds),now=new Date(),diff=Math.floor((now-d)/86400000); if(diff===0)return"Today"; if(diff===1)return"Yesterday"; return d.toLocaleDateString("en-MY",{day:"numeric",month:"short"}); }
+function weekOf(ds: string){ const d=new Date(ds); d.setDate(d.getDate()-d.getDay()); return d.toISOString().split("T")[0]; }
 function genCode(){ return Math.random().toString(36).slice(2,8).toUpperCase(); }
-function initials(name){ return name.trim().split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase(); }
-function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
+function initials(name: string){ return name.trim().split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase(); }
+function sleep(ms: number){ return new Promise(r=>setTimeout(r,ms)); }
 
 const THEMES = {
   dark:  { bg:"#0F0F14", surface:"#1A1A24", card:"#1E1E2E", cardBorder:"#2D2D42", rowDiv:"#252535", text:"#F0F0FF", textSec:"#9090B0", textMuted:"#55557A", pill:"#252538", pillBorder:"#3A3A55", inputBg:"#252538", inputBorder:"#3A3A55", dateHBg:"#16161F", navBg:"#141420", navBorder:"#2D2D42", sTitle:"#6060A0", shadow:"0 4px 24px rgba(0,0,0,0.4)", cardShadow:"0 2px 12px rgba(0,0,0,0.3)" },
