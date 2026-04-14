@@ -1,54 +1,45 @@
-const ALGORITHM = "AES-GCM";
-const KEY_LENGTH = 256;
+const ALG = "AES-GCM";
 
 export async function deriveRoomKey(shareCode: string): Promise<CryptoKey> {
-  const encoder = new TextEncoder();
-  const keyMaterial = await crypto.subtle.importKey(
-    "raw",
-    encoder.encode(shareCode.toUpperCase()),
-    { name: "PBKDF2" },
-    false,
-    ["deriveKey"]
+  const enc = new TextEncoder();
+  const raw = await crypto.subtle.importKey(
+    "raw", enc.encode(shareCode.toUpperCase()),
+    { name: "PBKDF2" }, false, ["deriveKey"]
   );
-  const salt = encoder.encode("spendshare_v1_" + shareCode.toUpperCase());
   return crypto.subtle.deriveKey(
-    { name: "PBKDF2", salt, iterations: 100_000, hash: "SHA-256" },
-    keyMaterial,
-    { name: ALGORITHM, length: KEY_LENGTH },
-    false,
-    ["encrypt", "decrypt"]
+    { name: "PBKDF2", salt: enc.encode("spendshare_v1_" + shareCode.toUpperCase()), iterations: 100000, hash: "SHA-256" },
+    raw,
+    { name: ALG, length: 256 },
+    false, ["encrypt", "decrypt"]
   );
 }
 
-export async function encryptPayload(data: object, key: CryptoKey): Promise<{ payload: string; iv: string }> {
-  const encoder = new TextEncoder();
+export async function encrypt(data: object, key: CryptoKey): Promise<{ payload: string; iv: string }> {
   const iv = crypto.getRandomValues(new Uint8Array(12));
-  const ciphertext = await crypto.subtle.encrypt(
-    { name: ALGORITHM, iv },
+  const buf = await crypto.subtle.encrypt(
+    { name: ALG, iv },
     key,
-    encoder.encode(JSON.stringify(data))
+    new TextEncoder().encode(JSON.stringify(data))
   );
-  return { payload: bufferToBase64(ciphertext), iv: bufferToBase64(iv) };
+  return { payload: toB64(buf), iv: toB64(iv) };
 }
 
-export async function decryptPayload<T = Record<string, unknown>>(payload: string, iv: string, key: CryptoKey): Promise<T> {
-  const decoder = new TextDecoder();
-  const plaintext = await crypto.subtle.decrypt(
-    { name: ALGORITHM, iv: base64ToBuffer(iv) },
+export async function decrypt<T>(payload: string, iv: string, key: CryptoKey): Promise<T> {
+  const buf = await crypto.subtle.decrypt(
+    { name: ALG, iv: fromB64(iv) },
     key,
-    base64ToBuffer(payload)
+    fromB64(payload)
   );
-  return JSON.parse(decoder.decode(plaintext)) as T;
+  return JSON.parse(new TextDecoder().decode(buf)) as T;
 }
 
-function bufferToBase64(buffer: ArrayBuffer | Uint8Array): string {
-  const bytes = buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer);
-  return btoa(String.fromCharCode(...Array.from(bytes)));
+function toB64(buf: ArrayBuffer | Uint8Array): string {
+  return btoa(String.fromCharCode(...Array.from(buf instanceof Uint8Array ? buf : new Uint8Array(buf))));
 }
 
-function base64ToBuffer(base64: string): ArrayBuffer {
-  const binary = atob(base64);
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-  return bytes.buffer as ArrayBuffer;
+function fromB64(b64: string): ArrayBuffer {
+  const bin = atob(b64);
+  const arr = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+  return arr.buffer as ArrayBuffer;
 }
